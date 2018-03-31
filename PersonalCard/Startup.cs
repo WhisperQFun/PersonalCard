@@ -29,9 +29,13 @@ namespace PersonalCard
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<mysqlContext>(options => options.UseMySQL(Configuration.GetConnectionString("mysqlConnection")));
-            services.AddIdentity < ApplicationUser,IdentityRole> ().AddEntityFrameworkStores<mysqlContext>().AddDefaultTokenProviders();
             services.AddTransient<BlockchainService>();
-            services.AddTransient<AccountController>();
+            // установка конфигурации подключения
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(options => //CookieAuthenticationOptions
+            {
+                    options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
+            });
             services.AddMemoryCache();
             services.AddMvc();
             

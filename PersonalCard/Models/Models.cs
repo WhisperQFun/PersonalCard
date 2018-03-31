@@ -49,6 +49,9 @@ namespace PersonalCard.Models
         [Required]
         public string code_phrase { get; set; }
 
+        [Required]
+        public string type_of_blood { get; set; }
+
 
     }
 }

@@ -15,7 +15,10 @@ namespace PersonalCard.Services
 
     public class BlockchainService
         {
-
+            
+            
+            public static string REGION = "MSK";
+            public static List<Nodes> NODES= new List<Nodes>();
             private IMemoryCache cache;
             private mysqlContext db;
             public BlockchainService(IMemoryCache memoryCache, mysqlContext context)
@@ -79,7 +82,7 @@ namespace PersonalCard.Services
                 var nextIndex = previousBlock.index + 1;
                 var nextTimestamp = DateTime.Now.ToString();
                 var nextHash = await calculateHashAsync(nextIndex, previousBlock.hash, nextTimestamp, blockData);
-                return new Block(nextIndex, previousBlock.hash, nextTimestamp, blockData, nextHash);
+                return new Block(nextIndex, previousBlock.hash, nextTimestamp, blockData, nextHash,REGION);
             }
 
             public async Task<Block> getLatestBlockAsync()
@@ -122,7 +125,7 @@ namespace PersonalCard.Services
             }
             public static Block getGenesisBlock()
             {
-                return new Block(1, "0", DateTime.Now.ToString(), "Genesis block", "7d72de6ddb76a37cb1b3feab15c8e3dbc9af9b4fdc68359ede298491e0dce941");
+                return new Block(1, "0", DateTime.Now.ToString(), "Genesis block", "7d72de6ddb76a37cb1b3feab15c8e3dbc9af9b4fdc68359ede298491e0dce941",REGION);
             }
         }
     }

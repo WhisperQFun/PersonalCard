@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace PersonalCard.Context
 {
-    public class mysqlContext : IdentityDbContext<ApplicationUser>
+    public class mysqlContext : DbContext
     {
         public mysqlContext(DbContextOptions<mysqlContext> options) : base(options)
         {
@@ -26,8 +26,8 @@ namespace PersonalCard.Context
             base.OnModelCreating(builder);
         }
 
-        public virtual DbSet<User> User { get; set; }
-
-        public virtual DbSet<Block> Block { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<User> User { get; set; }
+        public DbSet<Block> Block { get; set; }
     }
 }
