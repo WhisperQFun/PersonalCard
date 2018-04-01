@@ -32,12 +32,12 @@ namespace PersonalCard.Services
                 if (!db.Block.Any())
                 {
                     db.Block.Add(getGenesisBlock());
-                    db.SaveChanges();
+                    await db.SaveChangesAsync();
                 }
                 if (!db.Roles.Any())
                 {
-                    await  db.Roles.AddRangeAsync(new Role {Id = 1,Name="User" },new Role { Id = 2, Name = "Doctor" }, new Role { Id = 1, Name = "Admin" });
-                    db.SaveChanges();
+                    await  db.Roles.AddRangeAsync(new Role {RoleId = 1,Name="User" },new Role { RoleId = 2, Name = "Doctor" }, new Role { RoleId = 3, Name = "Admin" });
+                    await db.SaveChangesAsync();
                 }
 
 

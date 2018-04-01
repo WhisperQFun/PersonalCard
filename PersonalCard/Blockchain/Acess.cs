@@ -7,7 +7,8 @@ namespace PersonalCard.Blockchain
 {
     public class Acess
     {
-        public string acess_id { get; set; }
+        
+        public int Id { get; set; }
         public string hash { get; set; }
         public string user { get; set; }
         public string timestamp { get; set; }
