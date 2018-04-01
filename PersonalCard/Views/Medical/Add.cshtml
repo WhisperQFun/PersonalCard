@@ -1,0 +1,61 @@
+﻿@model PersonalCard.Models.MedicalModel
+@{
+    ViewBag.Title = "Диагноз";
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+<div class="form-horizontal">
+    <h4>Диагноз</h4>
+    <hr />
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="form-group">
+        <label class="control-label col-md-2">Пациент</label>
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Hash, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.Hash, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2">Диагноз</label>
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.diagnosis, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.diagnosis, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2">Диагноз(Дополнительно)</label>
+        <div class="col-md-10">
+            @Html.TextAreaFor(model => model.diagnosis_fully, 5, 50, null)
+            @Html.ValidationMessageFor(model => model.diagnosis_fully, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2">Первая помощь</label>
+        <div class="col-md-10">
+            @Html.TextAreaFor(model => model.first_aid, 5, 50, null)
+            @Html.ValidationMessageFor(model => model.first_aid, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2">Условия</label>
+        <div class="col-md-10">
+            @Html.TextAreaFor(model => model.is_important, 5, 50, null)
+            @Html.CheckBox("is_important", true)
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" value="Сохранить" class="btn btn-default" />
+        </div>
+    </div>
+</div>
+}

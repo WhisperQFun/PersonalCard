@@ -34,9 +34,14 @@ namespace PersonalCard.Services
                     db.Block.Add(getGenesisBlock());
                     db.SaveChanges();
                 }
+                if (!db.Roles.Any())
+                {
+                    await  db.Roles.AddRangeAsync(new Role {Id = 1,Name="User" },new Role { Id = 2, Name = "Doctor" }, new Role { Id = 1, Name = "Admin" });
+                    db.SaveChanges();
+                }
 
 
-            }
+        }
 
             public async Task<List<Block>> GetBlocks()
             {
@@ -82,19 +87,37 @@ namespace PersonalCard.Services
                 var nextIndex = previousBlock.index + 1;
                 var nextTimestamp = DateTime.Now.ToString();
                 var nextHash = await calculateHashAsync(nextIndex, previousBlock.hash, nextTimestamp, blockData);
-                return new Block(nextIndex, previousBlock.hash, nextTimestamp, blockData, nextHash,REGION);
+                return new Block(nextIndex, previousBlock.hash, nextTimestamp, blockData, nextHash, REGION);
             }
 
-            public async Task<Block> getLatestBlockAsync()
+            public async Task<Block> generateNextBlockAsync(string blockData,string wallet_hash)
+            {
+                var previousBlock = await getLatestBlockAsync();
+                var nextIndex = previousBlock.index + 1;
+                var nextTimestamp = DateTime.Now.ToString();
+                var nextHash = await calculateHashAsync(nextIndex, previousBlock.hash, nextTimestamp, blockData);
+                return new Block(nextIndex, previousBlock.hash, nextTimestamp, blockData, nextHash, REGION,wallet_hash);
+            }
+
+            public async Task<Block> generateNextBlockAsync(string blockData, string wallet_hash,string destination_wallet)
+            {
+                var previousBlock = await getLatestBlockAsync();
+                var nextIndex = previousBlock.index + 1;
+                var nextTimestamp = DateTime.Now.ToString();
+                var nextHash = await calculateHashAsync(nextIndex, previousBlock.hash, nextTimestamp, blockData);
+                return new Block(nextIndex, previousBlock.hash, nextTimestamp, blockData, nextHash, REGION, wallet_hash,destination_wallet);
+            }
+
+        public async Task<Block> getLatestBlockAsync()
             {
                 Block last_block;
-                int max;
+                //int max;
 
                 //last_block = db.Block.Max();
                 //last_block= await db.Block.FirstOrDefaultAsync(p => p.blockID == max);
                 //last_block = await db.Block.FirstOrDefaultAsync(p => p.blockID == max);
                 last_block = await db.Block.LastOrDefaultAsync();
-                int er = 1;
+                //int er = 1;
 
 
 

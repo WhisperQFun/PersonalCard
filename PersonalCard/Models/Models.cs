@@ -54,4 +54,20 @@ namespace PersonalCard.Models
 
 
     }
+
+    public class MedicalModel
+    {
+        [Required]
+        public string diagnosis { get; set; }
+        [Required]
+        public string diagnosis_fully { get; set; }
+        [Required]
+        public string first_aid { get; set; }
+        [Required]
+        public string drugs { get; set; }
+        [Required]
+        public bool is_important { get; set; }
+        [Required]
+        public string Hash { get; set; }
+    }
 }

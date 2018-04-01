@@ -20,11 +20,12 @@ namespace PersonalCard.Controllers
             }
             public async Task<IActionResult> Index(int id)
             {
-                blockchainService.AddBlockAsync(await blockchainService.generateNextBlockAsync("Test"));
-                Block block = await blockchainService.getLatestBlockAsync();
-                if (block != null)
-                    return Content($"Block: {block.data}" + $" Hash: {block.hash}" + $" PrevHash: {block.previousHash}");
-                return Content("Product not found");
+            /* blockchainService.AddBlockAsync(await blockchainService.generateNextBlockAsync("Test"));
+             Block block = await blockchainService.getLatestBlockAsync();
+             if (block != null)
+                 return Content($"Block: {block.data}" + $" Hash: {block.hash}" + $" PrevHash: {block.previousHash}");
+             return Content("Product not found");*/
+            return View();
             }
             public IActionResult Error()
             {

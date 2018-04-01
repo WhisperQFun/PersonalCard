@@ -26,9 +26,7 @@ namespace PersonalCard.Controllers
         [Authorize(Roles = "admin, user")]
         public async Task<IActionResult> Index()
         {
-
-
-            return View()
+            return View();
         }
 
         [HttpPost]
@@ -40,7 +38,7 @@ namespace PersonalCard.Controllers
                 User user = await _context.User.FirstOrDefaultAsync(u => u.Login == model.login);
                 if (user == null)
                 {
-                    // добавляем пользователя в бд
+                    
                     user = new User { Login = model.login, Password = model.password };
                     Role userRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "User");
                     if (userRole != null)
@@ -49,7 +47,7 @@ namespace PersonalCard.Controllers
                     _context.User.Add(user);
                     await _context.SaveChangesAsync();
 
-                    await Authenticate(user); // аутентификация
+                    await Authenticate(user); 
 
                     return RedirectToAction("Index", "Home");
                 }
@@ -74,7 +72,7 @@ namespace PersonalCard.Controllers
                     .FirstOrDefaultAsync(u => u.Login == model.email && u.Password == model.password);
                 if (user != null)
                 {
-                    await Authenticate(user); // аутентификация
+                    await Authenticate(user); 
 
                     return RedirectToAction("Index", "Home");
                 }
