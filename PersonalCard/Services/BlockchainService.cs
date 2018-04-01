@@ -31,7 +31,7 @@ namespace PersonalCard.Services
             {
                 if (!db.Block.Any())
                 {
-                    db.Block.Add(getGenesisBlock());
+                    await db.Block.AddAsync(getGenesisBlock());
                     await db.SaveChangesAsync();
                 }
                 if (!db.Roles.Any())

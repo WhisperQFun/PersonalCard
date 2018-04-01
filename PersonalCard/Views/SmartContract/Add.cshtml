@@ -1,64 +1,67 @@
-﻿
-@model PersonalCard.Models.SmartCcontractModel
+﻿@model PersonalCard.Models.SmartCcontractModel
+
+
 @{
     ViewBag.Title = "Добавления контракта";
 }
+
+<h2>Регистрация</h2>
 
 @using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
 
-<div class="form-horizontal">
-    <h4>Контракт</h4>
-    <hr />
-    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-    <div class="form-group">
-        <label class="control-label col-md-2">Кошелек Заказчика</label>
-        <div class="col-md-10">
-            @Html.EditorFor(model => model.hash_сustomer, new { htmlAttributes = new { @class = "form-control" } })
-            @Html.ValidationMessageFor(model => model.hash_сustomer, "", new { @class = "text-danger" })
+    <div class="form-horizontal">
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            <label class="control-label col-md-2">Кошелек Заказчика</label>
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.hash_еxecutor, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.hash_еxecutor, "", new { @class = "text-danger" })
+            </div>
         </div>
-    </div>
 
-    <div class="form-group">
-        <label class="control-label col-md-2">Кошелек исполнителя</label>
-        <div class="col-md-10">
-            @Html.EditorFor(model => model.hash_еxecutor, new { htmlAttributes = new { @class = "form-control" } })
-            @Html.ValidationMessageFor(model => model.hash_еxecutor, "", new { @class = "text-danger" })
+        <div class="form-group">
+            <label class="control-label col-md-2">Кошелек исполнителя</label>
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.hash_еxecutor, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.hash_еxecutor, "", new { @class = "text-danger" })
+            </div>
         </div>
-    </div>
 
-    <div class="form-group">
-        <label class="control-label col-md-2">Сумма ордера</label>
-        <div class="col-md-10">
-            @Html.EditorFor(model => model.order_sum, new { htmlAttributes = new { @class = "form-control" } })
-            @Html.ValidationMessageFor(model => model.order_sum, "", new { @class = "text-danger" })
+        <div class="form-group">
+            <label class="control-label col-md-2">Сумма ордера</label>
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.order_sum, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.order_sum, "", new { @class = "text-danger" })
+            </div>
         </div>
-    </div>
 
-    <div class="form-group">
-        <label class="control-label col-md-2"></label>
-        <div class="col-md-10">
-            @Html.EditorFor(model => model.prepaid_expense, new { htmlAttributes = new { @class = "form-control" } })
-            @Html.ValidationMessageFor(model => model.hash_еxecutor, "", new { @class = "text-danger" })
+        <div class="form-group">
+            <label class="control-label col-md-2">Аванс</label>
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.prepaid_expense, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.prepaid_expense, "", new { @class = "text-danger" })
+            </div>
         </div>
-    </div>
 
-    <div class="form-group">
-        <label class="control-label col-md-2">Условия</label>
-        <div class="col-md-10">
-            @Html.TextAreaFor(model => model.condition, 5, 50, null)
-            @Html.ValidationMessageFor(model => model.condition, "", new { @class = "text-danger" })
+        <div class="form-group">
+            <label class="control-label col-md-2">Условия</label>
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.condition, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.condition, "", new { @class = "text-danger" })
+            </div>
         </div>
-    </div>
 
-    <div class="form-group">
-        <div class="col-md-offset-2 col-md-10">
-            <input type="submit" value="Сохранить" class="btn btn-default" />
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Регистрация" class="btn btn-default" />
+            </div>
         </div>
     </div>
-</div>
 }
+
 
 
 

@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <Content Remove="Views\Account\Resume.cshtml" />
+    <Content Remove="Views\Medical\Index.cshtml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -20,4 +21,10 @@
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="Views\Medical\Index.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Views\Medical\Index.cshtml" />
+  </ItemGroup>
 </Project>

@@ -30,14 +30,16 @@ namespace PersonalCard.Controllers
         {
             return View();
         }
-
+		[Authorize]
         public async Task<IActionResult> Add()
         {
             return View();
         }
 
-        [Authorize]
-        public async Task<IActionResult> Add(SmartCcontractModel model)
+        
+		[HttpPost]
+        [ValidateAntiForgeryToken]
+		public async Task<IActionResult> Add(SmartCcontractModel model)
         {
             User user = null;
             Contract contract = null;
@@ -46,7 +48,7 @@ namespace PersonalCard.Controllers
             if (ModelState.IsValid)
             {
                 user = await _context.User.FirstOrDefaultAsync(u => u.Login == User.Identity.Name);
-                if (user == null)
+                if (user != null)
                 {
                     string contract_hash = await ShaEncoder.GenerateSHA256String(model.order_sum + model.prepaid_expense+DateTime.Now);
                     contract = new Contract {hash_сustomer = user.Hash, hash_еxecutor = model.hash_еxecutor,
@@ -59,7 +61,9 @@ namespace PersonalCard.Controllers
                         ,destination_wallet = model.hash_еxecutor,info = json,timestamp = DateTime.Now.ToString() };
                     await _context.Transactions.AddAsync(transactions);
                     await _context.SaveChangesAsync();
-                    
+					user.balance = Convert.ToInt16(model.prepaid_expense);
+					_context.User.Update(user);
+					await _context.SaveChangesAsync();
 
                     return RedirectToAction("Index", "Home");
                 }
