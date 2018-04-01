@@ -26,9 +26,20 @@ namespace PersonalCard.Controllers
         }
 
         [Authorize]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+			List<Medical> medicals = new List<Medical>();
+			User user = await _context.User.FirstOrDefaultAsync(u => u.Login == User.Identity.Name);
+			List<Block> blocks = _context.Block.ToList();
+
+			foreach(var bloks in blocks)
+			{
+				medicals.Add(JsonConvert.DeserializeObject<Medical>(bloks.data));
+
+			}
+
+
+			return View(medicals);
         }
 
         [HttpGet]

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using PersonalCard.Blockchain;
 
 namespace PersonalCard.Models
 {
@@ -72,4 +73,10 @@ namespace PersonalCard.Models
         [Required]
         public string key_frase { get; set; }
     }
+
+	public class MedicalsModel
+	{
+		public List<Medical> medicals { get; set; }
+
+	}
 }
