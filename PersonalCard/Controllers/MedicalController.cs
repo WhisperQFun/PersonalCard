@@ -37,10 +37,14 @@ namespace PersonalCard.Controllers
         {
             User user = await _context.User.FirstOrDefaultAsync(u => u.Hash == hash);
             MedicalModel model = new MedicalModel();
+            
+
             if (await ShaEncoder.GenerateSHA256String(user.Login+user.Password+Key) == hash)
             {
                 model.Hash = hash.ToString();
-                return View(model);
+                model.key_frase = Key;
+                return //RedirectToAction("Medical", "AddFinaly", model);
+                    View(model);
             }
 
             return View();
@@ -48,20 +52,40 @@ namespace PersonalCard.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Doctor")]
-        public async Task<IActionResult> Add(MedicalModel model)
+        public async Task<IActionResult> Add([FromQuery]string hash, [FromQuery]string Key, string Hash,
+            string diagnosis, string diagnosis_fully, 
+            string first_aid, string drugs, string is_important)
         {
-            if (ModelState.IsValid)
+            bool boolean;
+            try
             {
-                User user = await _context.User.FirstOrDefaultAsync(u => u.Hash == model.Hash);
-                Medical medical = new Medical() { diagnosis = model.diagnosis, diagnosis_fully = model.diagnosis_fully, first_aid = model.first_aid, drugs = model.drugs, is_important = model.is_important };
+                if (is_important == "true")
+                {
+                    boolean = true; 
+
+                }
+                else
+                {
+                    boolean = false;
+                }
+
+                User user = await _context.User.FirstOrDefaultAsync(u => u.Hash == Hash);
+                Medical medical = new Medical() { diagnosis = diagnosis, diagnosis_fully = diagnosis_fully, first_aid = first_aid, drugs = drugs, is_important = boolean };
 
                 string json = JsonConvert.SerializeObject(medical);
-                blockchainService.AddBlockAsync(await blockchainService.generateNextBlockAsync(json, model.Hash));
+                blockchainService.AddBlockAsync(await blockchainService.generateNextBlockAsync(json, Hash));
 
 
                 return RedirectToAction("Index", "Account");
+
             }
-            return View(model);
+            catch
+            {
+                return View();
+            }
+               
+            /*return Content($"Hash: {Hash}" + $" diagnosis: {diagnosis}" + $" Важно: {is_important}" + $" Диагноз полностью: {diagnosis_fully}"
+                 + $" Первая помощь: {first_aid}" + $" Лекарства: {drugs}");*/
         }
 
         public async Task<IActionResult> Emergency([FromQuery]string Hash)

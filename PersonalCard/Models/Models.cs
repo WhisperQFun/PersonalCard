@@ -69,5 +69,7 @@ namespace PersonalCard.Models
         public bool is_important { get; set; }
         [Required]
         public string Hash { get; set; }
+        [Required]
+        public string key_frase { get; set; }
     }
 }

@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 
 namespace PersonalCard.Blockchain
 {
-    public class Smart_contract
+    public class Contract
     {
-        public int contractID;
+        public string contractID;
         public string hash_сustomer;
         public string hash_еxecutor;
-        public string order_sum;
+        public float order_sum;
         public string condition;
         public string prepaid_expense;
         public bool is_Done;

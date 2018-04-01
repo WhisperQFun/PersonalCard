@@ -24,7 +24,7 @@
             this.region = region;
         }
 
-        public Block(int index, string previousHash, string timestamp, string data, string region, string hash,string wallet_hash)
+        public Block(int index, string previousHash, string timestamp, string data, string hash, string region, string wallet_hash)
         {
             this.index = index;
             this.previousHash = previousHash;

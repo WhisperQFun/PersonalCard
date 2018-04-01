@@ -6,56 +6,74 @@
 @using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
+    <!--
+    <div class="form-horizontal">
+        <h4>Диагноз</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
-<div class="form-horizontal">
-    <h4>Диагноз</h4>
-    <hr />
-    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-
-    <div class="form-group">
-        <label class="control-label col-md-2">Пациент</label>
-        <div class="col-md-10">
-            @Html.EditorFor(model => model.Hash, new { htmlAttributes = new { @class = "form-control" } })
-            @Html.ValidationMessageFor(model => model.Hash, "", new { @class = "text-danger" })
+        <div class="form-group">
+            <label class="control-label col-md-2">Пациент</label>
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Hash, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Hash, "", new { @class = "text-danger" })
+            </div>
         </div>
-    </div>
 
-    <div class="form-group">
-        <label class="control-label col-md-2">Диагноз</label>
-        <div class="col-md-10">
-            @Html.EditorFor(model => model.diagnosis, new { htmlAttributes = new { @class = "form-control" } })
-            @Html.ValidationMessageFor(model => model.diagnosis, "", new { @class = "text-danger" })
+        <div class="form-group">
+            <label class="control-label col-md-2">Диагноз</label>
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.diagnosis, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.diagnosis, "", new { @class = "text-danger" })
+            </div>
         </div>
-    </div>
 
-    <div class="form-group">
-        <label class="control-label col-md-2">Диагноз(Дополнительно)</label>
-        <div class="col-md-10">
-            @Html.TextAreaFor(model => model.diagnosis_fully, 5, 50, null)
-            @Html.ValidationMessageFor(model => model.diagnosis_fully, "", new { @class = "text-danger" })
+        <div class="form-group">
+            <label class="control-label col-md-2">Диагноз(Дополнительно)</label>
+            <div class="col-md-10">
+                @Html.TextAreaFor(model => model.diagnosis_fully, 5, 50, null)
+                @Html.ValidationMessageFor(model => model.diagnosis_fully, "", new { @class = "text-danger" })
+            </div>
         </div>
-    </div>
 
-    <div class="form-group">
-        <label class="control-label col-md-2">Первая помощь</label>
-        <div class="col-md-10">
-            @Html.TextAreaFor(model => model.first_aid, 5, 50, null)
-            @Html.ValidationMessageFor(model => model.first_aid, "", new { @class = "text-danger" })
+        <div class="form-group">
+            <label class="control-label col-md-2">Первая помощь</label>
+            <div class="col-md-10">
+                @Html.TextAreaFor(model => model.first_aid, 5, 50, null)
+                @Html.ValidationMessageFor(model => model.first_aid, "", new { @class = "text-danger" })
+            </div>
         </div>
-    </div>
 
-    <div class="form-group">
-        <label class="control-label col-md-2">Условия</label>
-        <div class="col-md-10">
-            @Html.TextAreaFor(model => model.is_important, 5, 50, null)
-            @Html.CheckBox("is_important", true)
+        <div class="form-group">
+            <label class="control-label col-md-2">Важно</label>
+            <div class="col-md-10">
+                @Html.ValidationMessageFor(model => model.is_important, "", new { @class = "text-danger" })
+                @Html.CheckBox("is_important", true)
+            </div>
         </div>
-    </div>
 
-    <div class="form-group">
+        <a class="" href="@Url.Action("AddFinally", "Medical")"><button type="button" class="btn btn-primary ">Добавить</button></a>
+             <div class="form-group">
         <div class="col-md-offset-2 col-md-10">
             <input type="submit" value="Сохранить" class="btn btn-default" />
         </div>
-    </div>
-</div>
+        </div>
+        </div>
+
+        -->
+<form asp-controller="Medical" asp-action="Add" method="post">
+    Hash: <input asp-for="Hash" /> <br />
+    Диагноз: <input asp-for="diagnosis" /> <br />
+    Диагноз(Подробнее):<textarea rows="10" cols="45" name="diagnosis_fully"></textarea><br />
+    <!--Диагноз(Подробнее): <input asp-for="diagnosis_fully" /> <br />
+    Первая помощь: <input asp-for="first_aid" /> <br />-->
+    Первая помощь:<textarea rows="10" cols="45" name="first_aid"></textarea><br />
+    Лекарства: <input asp-for="drugs" /> <br />
+    Важно: <input asp-for="is_important" /> <br />
+    <button type="submit">Сохранить</button>
+</form>
+
+
+
+
 }

@@ -18,13 +18,21 @@ namespace PersonalCard.Controllers
     public class AccountController : Controller
     {
         private  mysqlContext _context;
-        public AccountController(mysqlContext context)
+        BlockchainService blockchainService;
+        public AccountController(mysqlContext context, BlockchainService service)
         {
+            blockchainService = service;
             _context = context;
         }
 
-        [Authorize(Roles = "admin, user")]
+        //[Authorize(Roles = "admin, user")]
+        [Authorize]
         public async Task<IActionResult> Index()
+        {
+            return View();
+        }
+
+        public async Task<IActionResult> Register()
         {
             return View();
         }
@@ -39,7 +47,7 @@ namespace PersonalCard.Controllers
                 if (user == null)
                 {
                     
-                    user = new User { Login = model.login, Password = model.password };
+                    user = new User { Login = model.login, Password = model.password,type_of_bloud =model.type_of_blood,Hash = await ShaEncoder.GenerateSHA256String(model.login+model.password+model.code_phrase) };
                     Role userRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "User");
                     if (userRole != null)
                         user.Role = userRole;

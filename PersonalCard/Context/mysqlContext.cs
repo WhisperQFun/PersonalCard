@@ -30,5 +30,7 @@ namespace PersonalCard.Context
         public DbSet<User> User { get; set; }
         public DbSet<Block> Block { get; set; }
         public DbSet<Acess> Acess { get; set; }
+        public DbSet<Transactions> Transactions { get; set; }
+
     }
 }
