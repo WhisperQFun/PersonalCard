@@ -1,4 +1,4 @@
-﻿@model PersonalCard.Models.SmartCcontractModel
+﻿@model PersonalCard.Models.SmartContractModel
 
 
 @{
@@ -11,7 +11,7 @@
 {
     @Html.AntiForgeryToken()
 
-    <div class="form-horizontal">
+    <!--<div class="form-horizontal">
         <hr />
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
         <div class="form-group">
@@ -59,7 +59,19 @@
                 <input type="submit" value="Создание" class="btn btn-default" />
             </div>
         </div>
-    </div>
+    </div>-->
+
+<form asp-controller="SmartContract" asp-action="Add" method="post">
+    Хэш заказчика: <input asp-for="hash_сustomer" /> <br />
+    Хэш исполнителя: <input asp-for="hash_еxecutor" /> <br />
+    Сумма ордера: <input asp-for="order_sum" /> <br />
+    Аванс: <input asp-for="prepaid_expense" /> <br />
+    Условия: <input asp-for="condition" /> <br />
+    Выполнен: <input asp-for="is_Done" /> <br />
+    Заморожен: <input asp-for="is_freze" /> <br />
+    <button type="submit">Сохранить</button>
+</form>
+
 }
 
 

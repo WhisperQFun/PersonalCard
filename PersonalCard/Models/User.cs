@@ -11,6 +11,7 @@ namespace PersonalCard.Models
         public string type_of_bloud { get; set; }
         public bool is_donor { get; set; }
         public float balance { get; set; }
+        public string token { get; set; }
 
         public int? RoleId { get; set; }
         public Role Role { get; set; }
