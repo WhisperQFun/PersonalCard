@@ -7,7 +7,7 @@ using PersonalCard.Blockchain;
 
 namespace PersonalCard.Models
 {
-    public class SmartCcontractModel
+    public class SmartContractModel
     {
         [Required]
         public string hash_сustomer;

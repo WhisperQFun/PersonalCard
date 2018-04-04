@@ -9,8 +9,6 @@ using PersonalCard.Services;
 using PersonalCard.Encrypt;
 using PersonalCard.Context;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 
 namespace PersonalCard.Controllers

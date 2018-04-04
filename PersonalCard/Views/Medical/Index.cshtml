@@ -1,4 +1,4 @@
-﻿@model PersonalCard.Models.Medicals
+﻿@model IEnumerable<PersonalCard.Blockchain.Medical>
 
 @{
     ViewBag.Title = "Диагноз";
@@ -12,14 +12,14 @@
     <div class="contenier-fluid">
         <div class="container-fluid">
             <div class="row">
-                @foreach (var Events in Model)
+                @foreach (var medical in Model)
                 {
                 <div class="card col-lg-6 col-xl-2" style="width: 18rem;">
                     <img class="card-img-top" src="~/Content/img/2.jpg" alt="Card image cap">
                     <div class="card-body">
-                        <h5 class="card-title">@Events.name</h5>
-                        <p class="card-text">@Events.description</p>
-                        <p>@Events.date</p>
+                        <h5 class="card-title">@medical.diagnosis</h5>
+                        <p class="card-text">@medical.diagnosis_fully</p>
+                        <p>@medical.first_aid</p>
                         <a href="#" class="btn btn-primary">Участвовать</a>
                     </div>
                 </div>

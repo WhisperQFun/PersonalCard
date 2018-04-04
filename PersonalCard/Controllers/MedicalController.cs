@@ -30,11 +30,18 @@ namespace PersonalCard.Controllers
         {
 			List<Medical> medicals = new List<Medical>();
 			User user = await _context.User.FirstOrDefaultAsync(u => u.Login == User.Identity.Name);
-			List<Block> blocks = _context.Block.ToList();
+            List<Block> blocks = await _context.Block.Where(u => u.destination_wallet_hash != null && u.wallet_hash == user.Hash ).ToListAsync();
 
 			foreach(var bloks in blocks)
 			{
-				medicals.Add(JsonConvert.DeserializeObject<Medical>(bloks.data));
+                try
+                {
+                    medicals.Add(JsonConvert.DeserializeObject<Medical>(bloks.data));
+                }
+                catch
+                {
+
+                }
 
 			}
 
@@ -67,19 +74,10 @@ namespace PersonalCard.Controllers
             string diagnosis, string diagnosis_fully, 
             string first_aid, string drugs, string is_important)
         {
-            bool boolean;
+            bool boolean = String2bool.convert(is_important);
             try
             {
-                if (is_important == "true")
-                {
-                    boolean = true; 
-
-                }
-                else
-                {
-                    boolean = false;
-                }
-
+                
                 User user = await _context.User.FirstOrDefaultAsync(u => u.Hash == Hash);
                 Medical medical = new Medical() { diagnosis = diagnosis, diagnosis_fully = diagnosis_fully, first_aid = first_aid, drugs = drugs, is_important = boolean };
 
@@ -87,7 +85,7 @@ namespace PersonalCard.Controllers
                 blockchainService.AddBlockAsync(await blockchainService.generateNextBlockAsync(json, Hash));
 
 
-                return RedirectToAction("Index", "Account");
+                return RedirectToAction("Index", "Medical");
 
             }
             catch
