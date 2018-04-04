@@ -43,7 +43,7 @@ namespace PersonalCard.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Doctor")]
+        [Authorize]
         public async Task<IActionResult> Add([FromQuery]string hash, [FromQuery]string Key)
         {
             User user = await _context.User.FirstOrDefaultAsync(u => u.Hash == hash);
@@ -52,7 +52,7 @@ namespace PersonalCard.Controllers
 
             if (await ShaEncoder.GenerateSHA256String(user.Login+user.Password+Key) == hash)
             {
-                model.Hash = hash.ToString();
+                model.Hash = hash;
                 model.key_frase = Key;
                 return //RedirectToAction("Medical", "AddFinaly", model);
                     View(model);
@@ -62,7 +62,7 @@ namespace PersonalCard.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Doctor")]
+        [Authorize]
         public async Task<IActionResult> Add([FromQuery]string hash, [FromQuery]string Key, string Hash,
             string diagnosis, string diagnosis_fully, 
             string first_aid, string drugs, string is_important)
@@ -80,14 +80,14 @@ namespace PersonalCard.Controllers
                     boolean = false;
                 }
 
-                User user = await _context.User.FirstOrDefaultAsync(u => u.Hash == Hash);
+				User user = await _context.User.FirstOrDefaultAsync(u => u.Hash == hash);
                 Medical medical = new Medical() { diagnosis = diagnosis, diagnosis_fully = diagnosis_fully, first_aid = first_aid, drugs = drugs, is_important = boolean };
 
                 string json = JsonConvert.SerializeObject(medical);
                 blockchainService.AddBlockAsync(await blockchainService.generateNextBlockAsync(json, Hash));
 
 
-                return RedirectToAction("Index", "Account");
+                return RedirectToAction("Index", "Home");
 
             }
             catch
