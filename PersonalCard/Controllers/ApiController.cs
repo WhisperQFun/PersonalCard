@@ -1,11 +1,15 @@
-﻿/*
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using PersonalCard.Models;
 using Microsoft.AspNetCore.Mvc;
 using PersonalCard.Blockchain;
+using PersonalCard.Context;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using PersonalCard.Encrypt;
 
 namespace PersonalCard.Controllers
 {
@@ -40,89 +44,86 @@ namespace PersonalCard.Controllers
     {
         public request_info request_Info;
         public send_data send_data;
-       
-        
+
+
     }
 
-   
+
 
     public class ApiController : Controller
     {
+        private mysqlContext _context;
         List<Medical> Ls = new List<Medical>();
         // key api : ee85d34b-8443-4c8d-9369-0cfb04c2d79d
         // GET: Api
         // example string http://www.example.com/Api?key=ee85d34b-8443-4c8d-9369-0cfb04c2d79d&target=authorization&email=1@gmail.com&password=1
-        public ActionResult Index()
+
+        public ApiController(mysqlContext context)
         {
-            if (this.Request.QueryString != null && Request.QueryString["target"] != null && this.Request.QueryString["email"] != null && this.Request.QueryString["password"] != null)
+            _context = context;
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Index()
+        {
+            return View();
+        }
+
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Index(string site, string organisation)
+        {
+            User user = null;
+            API api = null;
+            user = await _context.User.FirstOrDefaultAsync(u => u.Login == User.Identity.Name);
+
+
+
+            api = new API
             {
-                if (this.Request.QueryString["key"] == "ee85d34b-8443-4c8d-9369-0cfb04c2d79d")
+                is_active = true,
+                site = site,
+                organisation = organisation,
+                timestamp = DateTime.Now.ToString(),
+                token = await ShaEncoder.GenerateSHA256String(site + organisation + DateTime.Now.ToString())
+            };
+            await _context.Api.AddAsync(api);
+            await _context.SaveChangesAsync();
+            return Content("Token: " + api.token);
+
+            
+        }
+
+        public async Task<IActionResult> request([FromQuery]string token, [FromQuery]string login, [FromQuery]string password)
+        {
+            User user = null;
+            if (await _context.Api.FirstOrDefaultAsync(u => u.token == token && u.is_active == true) != null)
+            {
+                user = await _context.User.FirstOrDefaultAsync(u => u.Login == login && u.Password == password);
+                if (user != null)
                 {
-                    var rg = new request_data();
-                    rg.key = this.Request.QueryString["key"];
-                    rg.target = this.Request.QueryString["target"];
-                    rg.email = this.Request.QueryString["email"];
-                    rg.password = this.Request.QueryString["password"];
+
 
                     // поиск пользователя в бд
-                    User user = null;
-                    Resume resume = null;
-                    using (UserContext db = new UserContext())
-                    {
-                        user = db.Users.FirstOrDefault(u => u.email == rg.email && u.password == rg.password);
-                        try
-                        {
-                            resume = db.Resume.FirstOrDefault(u => u.user_id == user.id);
-                        }
-                        catch
-                        {
 
-                        }
-                        
-                        
-                        
-                    }
+
+
+
+
+
+
+
                     if (user != null)
                     {
                         try
                         {
-                            Ls.Add(new Places_of_work());
-                            Ls.Add(new Places_of_work());
-                            Ls.Add(new Places_of_work());
-                            Ls[0].id = 1;
-                            Ls[0].name = "First place";
-                            Ls[0].position = "Programmer";
-                            Ls[0].description = "вырпвфырфкпецепцкеп";
-                            Ls[0].date_begin = "12.12.2017";
-                            Ls[0].date_end = "12.12.2018";
-                            Ls[1].id = 2;
-                            Ls[1].name = "First place";
-                            Ls[1].position = "Programmer";
-                            Ls[1].description = "вырпвфырфкпецепцкеп";
-                            Ls[1].date_begin = "12.12.2017";
-                            Ls[1].date_end = "12.12.2018";
-                            Ls[2].id = 3;
-                            Ls[2].name = "First place";
-                            Ls[2].position = "Programmer";
-                            Ls[2].description = "вырпвфырфкпецепцкеп";
-                            Ls[2].date_begin = "12.12.2017";
-                            Ls[2].date_end = "12.12.2018";
-
                             var data_response = new response_api();
                             data_response.request_Info = new request_info();
                             data_response.request_Info.answer = "OK";
                             data_response.request_Info.code = "200";
                             data_response.send_data = new send_data();
-                            data_response.send_data.first_name = user.first_name;
-                            data_response.send_data.last_name = user.last_name;
-                            data_response.send_data.middle_name = user.middle_name;
-                            data_response.send_data.UserGender = user.UserGender.ToString();
-                            data_response.send_data.about_me = user.about_me;
-                            data_response.send_data.tags = user.tags;
-                            data_response.send_data.rating = user.rating;
-                            data_response.send_data.birthday_date = user.birthday_date;
-                            data_response.Resume = resume;
-                            data_response.Places_of_work = Ls;
 
 
                             var dt_resp = JsonConvert.SerializeObject(data_response);
@@ -142,8 +143,8 @@ namespace PersonalCard.Controllers
                             return Content(dt_resp, "application/json");
 
                         }
-                        
-                        
+
+
                     }
                     else
                     {
@@ -178,106 +179,8 @@ namespace PersonalCard.Controllers
                 var dt_resp = JsonConvert.SerializeObject(answ);
                 return Content(dt_resp, "application/json");
             }
-            
-        }
-        public ActionResult Game()
-        {
-            Game games_1 = new Game();
-            Game games = new Game();
-            GameModel model = new GameModel();
-            if (this.Request.QueryString != null && this.Request.QueryString["category"] != null && this.Request.QueryString["answer"] != null && this.Request.QueryString["id_game"] != null && this.Request.QueryString["score"] != null)
-            {
-                if (this.Request.QueryString["key"] == "ee85d34b-8443-4c8d-9369-0cfb04c2d79d")
-                {
-                    using (UserContext db = new UserContext())
-                    {
-                        var str = this.Request.QueryString["id_game"];
-                        games_1.id = Convert.ToInt32(str);
-                        games_1.type = this.Request.QueryString["category"];
-                        str = this.Request.QueryString["score"]; 
-                        games_1.score = Convert.ToInt32(str);
-
-                        try
-                        {
-                            games = db.Game.FirstOrDefault(u => u.type == games_1.type && u.id == games_1.id);
-                        }
-                        catch
-                        {
-
-                        }
-
-
-
-                    }
-                    if (games != null)
-                    {
-                       
-                            
-
-                            var data_response = new game_response();
-                            data_response.game = new Game();
-                            data_response.request_Info = new request_info();
-                            data_response.request_Info.answer = "OK";
-                            data_response.request_Info.code = "200";
-                            data_response.game.id = games.id;
-                            data_response.game.text = games.text;
-                            data_response.game.chose_1 = games.chose_1;
-                            data_response.game.chose_2 = games.chose_2;
-                            data_response.game.item_1 = games.item_1;
-                            data_response.game.item_2 = games.item_2;
-                            data_response.game.right_answer = games.right_answer;
-                            data_response.game.score = games.score;
-                            data_response.game.type = games.type;
-
-
-                            var dt_resp = JsonConvert.SerializeObject(data_response);
-                            
-
-
-
-                            return Content(dt_resp, "application/json");
-                        
-                            
-
-                        
-
-
-                    }
-                    else
-                    {
-                        var answ = new game_response();
-                        answ.request_Info = new request_info();
-                        answ.request_Info.code = "403";
-                        answ.request_Info.answer = "BadInfo";
-                        var dt_resp = JsonConvert.SerializeObject(answ);
-                        return Content(dt_resp, "application/json");
-
-                    }
-
-                }
-                else
-                {
-                    var answ = new game_response();
-                    answ.request_Info = new request_info();
-                    answ.request_Info.code = "400";
-                    answ.request_Info.answer = "Error";
-                    var dt_resp = JsonConvert.SerializeObject(answ);
-                    return Content(dt_resp, "application/json");
-                }
-
-
-            }
-            else
-            {
-                var answ = new game_response();
-                answ.request_Info = new request_info();
-                answ.request_Info.code = "400";
-                answ.request_Info.answer = "Error";
-                var dt_resp = JsonConvert.SerializeObject(answ);
-                return Content(dt_resp, "application/json");
-            }
 
         }
     }
 }
-*/
+        

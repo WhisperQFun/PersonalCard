@@ -1,7 +1,15 @@
-﻿
+﻿@model PersonalCard.Models.ApiModel
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Получение токена";
 }
 
-<h2>Index</h2>
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
 
+<form asp-controller="Api" asp-action="Index" method="post">
+    Site: <input asp-for="site" /> <br />
+    Организация: <input asp-for="organisation" /> <br />
+    <button type="submit">Сохранить</button>
+</form>
+}

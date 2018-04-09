@@ -31,6 +31,8 @@ namespace PersonalCard.Context
         public DbSet<Block> Block { get; set; }
         public DbSet<Acess> Acess { get; set; }
         public DbSet<Transactions> Transactions { get; set; }
+        public DbSet<API> Api { get; set; }
+
 
     }
 }

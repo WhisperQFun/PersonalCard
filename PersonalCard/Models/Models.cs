@@ -79,4 +79,13 @@ namespace PersonalCard.Models
 		public List<Medical> medicals { get; set; }
 
 	}
+
+    public class ApiModel
+    {
+        
+        [Required]
+        public string site { get; set; }
+        [Required]
+        public string organisation { get; set; }
+    }
 }
