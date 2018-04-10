@@ -45,7 +45,7 @@ namespace PersonalCard.Controllers
                 if (user == null)
                 {
                     
-                    user = new User { Login = model.login, Password = model.password,type_of_bloud =model.type_of_blood,Hash = await ShaEncoder.GenerateSHA256String(model.login+model.password+model.code_phrase) };
+                    user = new User { Login = model.login, Password = await ShaEncoder.GenerateSHA256String( model.password),type_of_bloud =model.type_of_blood,Hash = await ShaEncoder.GenerateSHA256String(model.login+model.password+model.code_phrase) };
                     Role userRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "User");
                     if (userRole != null)
                         user.Role = userRole;
@@ -73,9 +73,10 @@ namespace PersonalCard.Controllers
         {
             if (ModelState.IsValid)
             {
+                string pass = await ShaEncoder.GenerateSHA256String(model.password);
                 User user = await _context.User
                     .Include(u => u.Role)
-                    .FirstOrDefaultAsync(u => u.Login == model.email && u.Password == model.password);
+                    .FirstOrDefaultAsync(u => u.Login == model.email && u.Password == pass);
                 if (user != null)
                 {
                     await Authenticate(user); 

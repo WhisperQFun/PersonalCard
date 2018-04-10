@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using PersonalCard.Encrypt;
+using PersonalCard.Services;
 
 namespace PersonalCard.Controllers
 {
@@ -29,15 +30,7 @@ namespace PersonalCard.Controllers
 
     public class send_data
     {
-        public string first_name;
-        public string last_name;
-        public string middle_name;
-        public string UserGender;
-        public string about_me;
-        public string tags;
-        public int rating;
-        public string birthday_date;
-        public string place_of_work;
+        public List<Medical> medicals;
     }
 
     public class response_api
@@ -53,13 +46,15 @@ namespace PersonalCard.Controllers
     public class ApiController : Controller
     {
         private mysqlContext _context;
-        List<Medical> Ls = new List<Medical>();
+        BlockchainService blockchainService;
+        
         // key api : ee85d34b-8443-4c8d-9369-0cfb04c2d79d
         // GET: Api
         // example string http://www.example.com/Api?key=ee85d34b-8443-4c8d-9369-0cfb04c2d79d&target=authorization&email=1@gmail.com&password=1
 
-        public ApiController(mysqlContext context)
+        public ApiController(mysqlContext context, BlockchainService service)
         {
+            blockchainService = service;
             _context = context;
         }
 
@@ -96,7 +91,7 @@ namespace PersonalCard.Controllers
             
         }
 
-        public async Task<IActionResult> request([FromQuery]string token, [FromQuery]string login, [FromQuery]string password)
+        public async Task<IActionResult> login([FromQuery]string token, [FromQuery]string login, [FromQuery]string password)
         {
             User user = null;
             if (await _context.Api.FirstOrDefaultAsync(u => u.token == token && u.is_active == true) != null)
@@ -124,8 +119,15 @@ namespace PersonalCard.Controllers
                             data_response.request_Info.answer = "OK";
                             data_response.request_Info.code = "200";
                             data_response.send_data = new send_data();
+                            List<Block> blocks = _context.Block.Where(u=> u.wallet_hash == user.Hash).ToList();
+                            
+                            List<Medical> medicals = new List<Medical>();
+                            foreach (var bloks in blocks)
+                            {
+                                medicals.Add(JsonConvert.DeserializeObject<Medical>(bloks.data));
 
-
+                            }
+                            data_response.send_data.medicals = medicals;
                             var dt_resp = JsonConvert.SerializeObject(data_response);
                             //var data_response2 = JsonConvert.DeserializeObject<response_api>(dt_resp);
 
