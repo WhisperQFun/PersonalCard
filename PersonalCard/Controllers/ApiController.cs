@@ -127,7 +127,7 @@ namespace PersonalCard.Controllers
 
 
                             var dt_resp = JsonConvert.SerializeObject(data_response);
-                            var data_response2 = JsonConvert.DeserializeObject<response_api>(dt_resp);
+                            //var data_response2 = JsonConvert.DeserializeObject<response_api>(dt_resp);
 
 
 
