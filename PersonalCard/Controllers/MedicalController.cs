@@ -11,6 +11,9 @@ using PersonalCard.Encrypt;
 using PersonalCard.Services;
 using Newtonsoft.Json;
 using PersonalCard.Blockchain;
+using Microsoft.AspNetCore.Hosting;
+using QRCoder;
+using System.DrawingCore;
 
 namespace PersonalCard.Controllers
 {
@@ -18,8 +21,10 @@ namespace PersonalCard.Controllers
     {
         private mysqlContext _context;
         BlockchainService blockchainService;
-        public MedicalController(mysqlContext context, BlockchainService service)
+        private readonly IHostingEnvironment _hostingEnvironment;
+        public MedicalController(mysqlContext context, BlockchainService service, IHostingEnvironment hostingEnvironment)
         {
+            _hostingEnvironment = hostingEnvironment;
             blockchainService = service;
             blockchainService.Initialize();
             _context = context;
@@ -30,9 +35,9 @@ namespace PersonalCard.Controllers
         {
 			List<Medical> medicals = new List<Medical>();
 			User user = await _context.User.FirstOrDefaultAsync(u => u.Login == User.Identity.Name);
-			List<Block> blocks = _context.Block.ToList();
+            List<Block> blocks = _context.Block.Where(u => u.wallet_hash == user.Hash).ToList();
 
-			foreach(var bloks in blocks)
+            foreach (var bloks in blocks)
 			{
 				medicals.Add(JsonConvert.DeserializeObject<Medical>(bloks.data));
 
@@ -44,26 +49,32 @@ namespace PersonalCard.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> Add([FromQuery]string hash, [FromQuery]string Key)
+        public async Task<IActionResult> Add([FromQuery]string token)
         {
-            User user = await _context.User.FirstOrDefaultAsync(u => u.Hash == hash);
-            MedicalModel model = new MedicalModel();
-            
-
-            if (await ShaEncoder.GenerateSHA256String(user.Login+user.Password+Key) == hash)
+            if (token!=null)
             {
-                model.Hash = hash;
-                model.key_frase = Key;
-                return //RedirectToAction("Medical", "AddFinaly", model);
-                    View(model);
-            }
+                User user = await _context.User.FirstOrDefaultAsync(u => u.token == token);
+                MedicalModel model = new MedicalModel();
+                model.Hash = user.Hash;
 
-            return View();
+                user.token = await ShaEncoder.GenerateSHA256String(user.Login + user.Password + DateTime.Now.ToString());
+                _context.User.Update(user);
+                await _context.SaveChangesAsync();
+                string webRootPath = _hostingEnvironment.WebRootPath;
+                QRCodeGenerator qrGenerator = new QRCodeGenerator();
+                QRCodeData qrCodeData = qrGenerator.CreateQrCode("http://blockchain.whisperq.ru/medical/add?token=" + user.token, QRCodeGenerator.ECCLevel.Q);
+                QRCode qrCode = new QRCode(qrCodeData);
+                Bitmap qrCodeImage = qrCode.GetGraphic(10, Color.Black, Color.White, (Bitmap)Bitmap.FromFile(webRootPath + "/images/piedPiper.png"));
+                qrCodeImage.Save(webRootPath + "/images/QR/" + user.Login + ".jpg");
+                return View(model);//RedirectToAction("Medical", "AddFinaly", model);
+            }
+            return RedirectToAction("Index", "Home");
+
         }
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> Add([FromQuery]string hash, [FromQuery]string Key, string Hash,
+        public async Task<IActionResult> Add([FromQuery]string token, string Hash,
             string diagnosis, string diagnosis_fully, 
             string first_aid, string drugs, string is_important)
         {
@@ -80,7 +91,7 @@ namespace PersonalCard.Controllers
                     boolean = false;
                 }
 
-				User user = await _context.User.FirstOrDefaultAsync(u => u.Hash == hash);
+				User user = await _context.User.FirstOrDefaultAsync(u => u.Hash == Hash);
                 Medical medical = new Medical() { diagnosis = diagnosis, diagnosis_fully = diagnosis_fully, first_aid = first_aid, drugs = drugs, is_important = boolean };
 
                 string json = JsonConvert.SerializeObject(medical);

@@ -88,4 +88,11 @@ namespace PersonalCard.Models
         [Required]
         public string organisation { get; set; }
     }
+    public class HomeModel
+    {
+        public string user_login;
+        public string user_balance;
+        //[Required]
+        
+    }
 }

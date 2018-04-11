@@ -6,31 +6,26 @@
 
 @using (Html.BeginForm())
 {
-@Html.AntiForgeryToken()
+    @Html.AntiForgeryToken()
 
-<div class="contenier ml-3 mt-4">
-    <div class="contenier-fluid">
-        <div class="container-fluid">
-            <div class="row">
-                @foreach (var medical in Model)
-                {
-                <div class="card col-lg-6 col-xl-2" style="width: 18rem;">
-                    <img class="card-img-top" src="~/Content/img/2.jpg" alt="Card image cap">
-                    <div class="card-body">
-                        <h5 class="card-title">@medical.diagnosis</h5>
-                        <p class="card-text">@medical.diagnosis_fully</p>
-                        <p>@medical.first_aid</p>
-                        <a href="#" class="btn btn-primary">Подробнее</a>
-                    </div>
+    <div class="contenier ml-3 mt-4">
+        <div class="contenier-fluid">
+            <div class="container-fluid">
+                <div class="row">
+                    @foreach (var medical in Model)
+                    {
+                        <div class="card col-lg-6 col-xl-2" style="width: 18rem;">
+                            <img class="card-img-top" src="~/images/Medicalcard.png" alt="Card image cap">
+                            <div class="card-body">
+                                <h5 class="card-title">@medical.diagnosis</h5>
+                                <p class="card-text">@medical.diagnosis_fully</p>
+                                <p>@medical.first_aid</p>
+                                <a href="#" class="btn btn-primary">Подробнее</a>
+                            </div>
+                        </div>
+                    }
                 </div>
-                }
             </div>
         </div>
     </div>
-</div>
-
-
-
-
-
 }

@@ -10,6 +10,11 @@ using PersonalCard.Encrypt;
 using PersonalCard.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using System;
+using QRCoder;
+using System.DrawingCore;
+
+using Microsoft.AspNetCore.Hosting;
 
 namespace PersonalCard.Controllers
 {
@@ -17,8 +22,10 @@ namespace PersonalCard.Controllers
     {
         private  mysqlContext _context;
         BlockchainService blockchainService;
-        public AccountController(mysqlContext context, BlockchainService service)
+        private readonly IHostingEnvironment _hostingEnvironment;
+        public AccountController(mysqlContext context, BlockchainService service, IHostingEnvironment hostingEnvironment)
         {
+            _hostingEnvironment = hostingEnvironment;
             blockchainService = service;
             _context = context;
         }
@@ -45,14 +52,23 @@ namespace PersonalCard.Controllers
                 if (user == null)
                 {
                     
-                    user = new User { Login = model.login, Password = await ShaEncoder.GenerateSHA256String( model.password),type_of_bloud =model.type_of_blood,Hash = await ShaEncoder.GenerateSHA256String(model.login+model.password+model.code_phrase) };
+                    user = new User { Login = model.login, Password = await ShaEncoder.GenerateSHA256String( model.password),
+                        type_of_bloud =model.type_of_blood,Hash = await ShaEncoder.GenerateSHA256String(model.login+model.password+model.code_phrase),
+                        token = await ShaEncoder.GenerateSHA256String(model.login + model.password + DateTime.Now.ToString())
+                        
+                };
                     Role userRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "User");
                     if (userRole != null)
                         user.Role = userRole;
 
                     _context.User.Add(user);
                     await _context.SaveChangesAsync();
-
+                    string webRootPath = _hostingEnvironment.WebRootPath;
+                    QRCodeGenerator qrGenerator = new QRCodeGenerator();
+                    QRCodeData qrCodeData = qrGenerator.CreateQrCode("http://blockchain.whisperq.ru/medical/add?token="+user.token, QRCodeGenerator.ECCLevel.Q);
+                    QRCode qrCode = new QRCode(qrCodeData);
+                    Bitmap qrCodeImage = qrCode.GetGraphic(10, Color.Black, Color.White, (Bitmap)Bitmap.FromFile(webRootPath + "/images/piedPiper.png"));
+                    qrCodeImage.Save(webRootPath+"/images/QR/" +user.Login+".jpg");
                     await Authenticate(user); 
 
                     return RedirectToAction("Index", "Home");
@@ -86,6 +102,12 @@ namespace PersonalCard.Controllers
                 ModelState.AddModelError("", "Некорректные логин и(или) пароль");
             }
             return View(model);
+        }
+
+        [HttpGet]
+        public IActionResult Home()
+        {
+            return View();
         }
 
 
