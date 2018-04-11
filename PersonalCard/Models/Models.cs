@@ -91,6 +91,7 @@ namespace PersonalCard.Models
     public class HomeModel
     {
         public string user_login;
+        public string user_link;
         public string user_balance;
         //[Required]
         

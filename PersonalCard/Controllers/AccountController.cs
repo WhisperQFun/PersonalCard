@@ -105,9 +105,15 @@ namespace PersonalCard.Controllers
         }
 
         [HttpGet]
-        public IActionResult Home()
+        [Authorize]
+        public async Task<IActionResult> Home()
         {
-            return View();
+            User user = await _context.User.FirstOrDefaultAsync(u => u.Login == User.Identity.Name);
+            HomeModel model = new HomeModel();
+            model.user_login = user.Login;
+            model.user_link = user.Login + ".jpg";
+            model.user_balance = user.balance.ToString();
+            return View(model);
         }
 
 

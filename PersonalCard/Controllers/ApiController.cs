@@ -24,6 +24,7 @@ namespace PersonalCard.Controllers
     {
         public List<Medical> medicals;
         public List<Contract> contracts;
+        public User user;
     }
 
     public class response_api
@@ -113,7 +114,7 @@ namespace PersonalCard.Controllers
                             data_response.request_Info.code = "200";
                             data_response.send_data = new send_data();
                             List<Block> blocks = _context.Block.Where(u=> u.wallet_hash == user.Hash).ToList();
-                            
+                            data_response.send_data.user = user;
                             List<Medical> medicals = new List<Medical>();
                             foreach (var bloks in blocks)
                             {

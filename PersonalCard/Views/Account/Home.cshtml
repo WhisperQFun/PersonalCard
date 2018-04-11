@@ -1,7 +1,29 @@
-﻿
+﻿@model PersonalCard.Models.HomeModel
+
 @{
-    ViewData["Title"] = "Home";
+    ViewBag.Title = "Личный кабинет";
 }
 
-<h2>Home</h2>
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
 
+    <div class="contenier ml-3 mt-4">
+        <div class="contenier-fluid">
+            <div class="container-fluid">
+                    <p>Привет! @Model.user_login</p>
+                    <img src="~/images/QR/@Model.user_link" alt="QR" height="180" width="180">
+                    <div class="card-body">
+                        <p>Баланс: @Model.user_balance</p>
+                        <p>Смарт контракт</p>
+                        <a href="@Url.Action("Add", "SmartContract")" class="btn btn-primary">Добавить</a>
+                        <p>Медицинская карта</p>
+                        <a href="@Url.Action("Index", "Medical")" class="btn btn-primary">Просмотреть</a>
+                        <p>Получение Api токена</p>
+                        <a href="@Url.Action("Index", "Api")" class="btn btn-primary">Получить</a>
+                        <p>Пример запроса через Api на логин:http://blockchain.whisperq.ru/api/login?token=(Application token)&login=(User login)&password=(User password(Sha256 hash only!!!))</p>
+                    </div>
+            </div>
+        </div>
+    </div>
+}

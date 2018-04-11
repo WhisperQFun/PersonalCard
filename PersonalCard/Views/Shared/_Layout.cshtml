@@ -26,7 +26,7 @@
             @if (User.Identity.IsAuthenticated == true)
                 {
             <div class="register">
-                <a class="" href="@Url.Action("Index", "Home")"><button type="button" class="btn btn-primary ">Личный кабинет</button></a>
+                <a class="" href="@Url.Action("Home", "Account")"><button type="button" class="btn btn-primary ">Личный кабинет</button></a>
                 <a class="" href="@Url.Action("Logout", "Account")"><button type="button" class="btn btn-primary ">Выйти</button></a>
 
             </div>

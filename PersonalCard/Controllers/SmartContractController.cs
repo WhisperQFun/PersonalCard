@@ -33,7 +33,11 @@ namespace PersonalCard.Controllers
 		[Authorize]
         public async Task<IActionResult> Add()
         {
-            return View();
+            User user = null;
+            user = await _context.User.FirstOrDefaultAsync(u => u.Login == User.Identity.Name);
+            SmartContractModel model = new SmartContractModel();
+            model.hash_сustomer = user.Hash;
+            return View(model);
         }
 
         
@@ -52,23 +56,41 @@ namespace PersonalCard.Controllers
                 user = await _context.User.FirstOrDefaultAsync(u => u.Login == User.Identity.Name);
                 if (user != null)
                 {
-                    string contract_hash = await ShaEncoder.GenerateSHA256String(order_sum + prepaid_expense+DateTime.Now);
-                    contract = new Contract {hash_сustomer = user.Hash, hash_еxecutor = hash_executor,
-                        order_sum =Convert.ToInt32( order_sum)- Convert.ToInt32(prepaid_expense),
-                        prepaid_expense = prepaid_expense,is_freze=true,is_Done=false, contractID = contract_hash };
-                    //,Hash = await ShaEncoder.GenerateSHA256String(model.login + model.password + model.code_phrase
-                    string json = JsonConvert.SerializeObject(contract);
-                    blockchainService.AddBlockAsync(await blockchainService.generateNextBlockAsync(json,user.Hash, hash_executor));
-                    transactions = new Transactions {original_wallet = user.Hash
-                        ,destination_wallet = hash_executor,
-                        info = json,timestamp = DateTime.Now.ToString() };
-                    await _context.Transactions.AddAsync(transactions);
-                    await _context.SaveChangesAsync();
-					user.balance = Convert.ToInt16(prepaid_expense);
-					_context.User.Update(user);
-					await _context.SaveChangesAsync();
-
-                    return RedirectToAction("Index", "Home");
+                    if (user.balance >= Convert.ToDouble(order_sum))
+                    {
+                        string contract_hash = await ShaEncoder.GenerateSHA256String(order_sum + prepaid_expense + DateTime.Now);
+                        contract = new Contract
+                        {
+                            hash_сustomer = user.Hash,
+                            hash_еxecutor = hash_executor,
+                            order_sum = Convert.ToInt32(order_sum) - Convert.ToInt32(prepaid_expense),
+                            prepaid_expense = prepaid_expense,
+                            is_freze = true,
+                            is_Done = false,
+                            contractID = contract_hash
+                        };
+                        //,Hash = await ShaEncoder.GenerateSHA256String(model.login + model.password + model.code_phrase
+                        string json = JsonConvert.SerializeObject(contract);
+                        blockchainService.AddBlockAsync(await blockchainService.generateNextBlockAsync(json, user.Hash, hash_executor));
+                        transactions = new Transactions
+                        {
+                            original_wallet = user.Hash
+                            ,
+                            destination_wallet = hash_executor,
+                            info = json,
+                            timestamp = DateTime.Now.ToString()
+                        };
+                        await _context.Transactions.AddAsync(transactions);
+                        await _context.SaveChangesAsync();
+                        user.balance = Convert.ToInt16(prepaid_expense);
+                        _context.User.Update(user);
+                        await _context.SaveChangesAsync();
+                        return RedirectToAction("Index", "Home");
+                    }
+                    else
+                    {
+                        return Content("Недостаточно средств" );
+                    }
                 }
                 else
                     ModelState.AddModelError("", "Некорректные логин и(или) пароль");
@@ -80,43 +102,3 @@ namespace PersonalCard.Controllers
         }
     }
 }
-/*
- 
-        [HttpPost]
-        [Authorize(Roles = "Doctor")]
-        public async Task<IActionResult> Add([FromQuery]string hash, [FromQuery]string Key, string Hash,
-            string diagnosis, string diagnosis_fully, 
-            string first_aid, string drugs, string is_important)
-        {
-            bool boolean;
-            try
-            {
-                if (is_important == "true")
-                {
-                    boolean = true; 
-
-                }
-                else
-                {
-                    boolean = false;
-                }
-
-                User user = await _context.User.FirstOrDefaultAsync(u => u.Hash == Hash);
-                Medical medical = new Medical() { diagnosis = diagnosis, diagnosis_fully = diagnosis_fully, first_aid = first_aid, drugs = drugs, is_important = boolean };
-
-                string json = JsonConvert.SerializeObject(medical);
-                blockchainService.AddBlockAsync(await blockchainService.generateNextBlockAsync(json, Hash));
-
-
-                return RedirectToAction("Index", "Medical");
-
-            }
-            catch
-            {
-                return View();
-            }
-               
-            /*return Content($"Hash: {Hash}" + $" diagnosis: {diagnosis}" + $" Важно: {is_important}" + $" Диагноз полностью: {diagnosis_fully}"
-                 + $" Первая помощь: {first_aid}" + $" Лекарства: {drugs}");*/
-        
-     
