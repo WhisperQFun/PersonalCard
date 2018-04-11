@@ -25,12 +25,24 @@ namespace PersonalCard.Controllers
             blockchainService = service;
 
         }
-        
-        public IActionResult Index()
+
+        public async Task<IActionResult> Index()
         {
-            return View();
+
+            List<Contract> contracts = new List<Contract>();
+            User user = await _context.User.FirstOrDefaultAsync(u => u.Login == User.Identity.Name);
+            List<Block> blocks = _context.Block.Where(u => u.wallet_hash == user.Hash && u.destination_wallet_hash!=null).ToList();
+
+            foreach (var bloks in blocks)
+            {
+                contracts.Add(JsonConvert.DeserializeObject<Contract>(bloks.data));
+
+            }
+
+
+            return View(contracts);
         }
-		[Authorize]
+        [Authorize]
         public async Task<IActionResult> Add()
         {
             User user = null;

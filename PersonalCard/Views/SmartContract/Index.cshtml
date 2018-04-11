@@ -1,47 +1,35 @@
-﻿
-@model PersonalCard.Models.SmartContractModel
+﻿@model IEnumerable<PersonalCard.Blockchain.Contract>
+
 @{
-    ViewBag.Title = "Добавления контракта";
+    ViewBag.Title = "Диагноз";
 }
 
 @using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
 
-    <!--
-    <div class="form-horizontal">
-        <h4>Мероприятие</h4>
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        <div class="form-group">
-            <label class="control-label col-md-2">Заголовок</label>
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.hash_сustomer, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.hash_сustomer, "", new { @class = "text-danger" })
+    <div class="contenier ml-3 mt-4">
+        <div class="contenier-fluid">
+            <div class="container-fluid">
+                <div class="row">
+                    @foreach (var contract in Model)
+                    {
+                        <div class="card col-lg-6 col-xl-2" style="width: 18rem;">
+                            <img class="card-img-top" src="~/images/contract.png" alt="image">
+                            <div class="card-body">
+                                <h5 class="card-title">@contract.contractID</h5>
+                                <p class="card-text">Условие: @contract.condition</p>
+                                <p>Хэш заказчика: @contract.hash_сustomer</p>
+                                <p>Хэш исполнителя: @contract.hash_еxecutor</p>
+                                <p>Сумма контракта: @contract.order_sum</p>
+                                <p>Аванс: @contract.prepaid_expense</p>
+                                <p>Хэш исполнителя: @contract.condition</p>
+                                <a href="#" class="btn btn-primary">Подробнее</a>
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
-
-        <div class="form-group">
-            <label class="control-label col-md-2">Описание</label>
-            <div class="col-md-10">
-                @Html.TextAreaFor(model => model.condition, 5, 50, null)
-                @Html.ValidationMessageFor(model => model.condition, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="control-label col-md-2">Дата мероприятия</label>
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.hash_еxecutor, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.hash_еxecutor, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Сохранить" class="btn btn-default" />
-            </div>
-        </div>
-    </div>-->
+    </div>
 }
-
