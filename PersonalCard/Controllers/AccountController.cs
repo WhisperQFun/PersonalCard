@@ -119,7 +119,7 @@ namespace PersonalCard.Controllers
             model.user_login = user.Login;
             model.user_link = user.Login + ".jpg";
             model.user_link_emerg = user.Login + "_emerg.jpg";
-            model.user_balance = user.balance.ToString();
+            model.user_balance = Convert.ToString(user.balance);
             return View(model);
         }
 
