@@ -110,9 +110,23 @@ namespace PersonalCard.Controllers
                  + $" Первая помощь: {first_aid}" + $" Лекарства: {drugs}");*/
         }
 
-        public async Task<IActionResult> Emergency([FromQuery]string Hash)
+		public async Task<IActionResult> Emergency([FromQuery]string token)
         {
-            return View();
+			if (token != null)
+            {
+				User user = await _context.User.FirstOrDefaultAsync(u => u.token == token);
+                user.token = await ShaEncoder.GenerateSHA256String(user.Login + user.Password + DateTime.Now.ToString());
+                _context.User.Update(user);
+                await _context.SaveChangesAsync();
+                string webRootPath = _hostingEnvironment.WebRootPath;
+                QRCodeGenerator qrGenerator = new QRCodeGenerator();
+				QRCodeData qrCodeData = qrGenerator.CreateQrCode("http://blockchain.whisperq.ru/medical/Emergency?token=" + user.token, QRCodeGenerator.ECCLevel.Q);
+                QRCode qrCode = new QRCode(qrCodeData);
+                Bitmap qrCodeImage = qrCode.GetGraphic(10, Color.Black, Color.White, (Bitmap)Bitmap.FromFile(webRootPath + "/images/piedPiper.png"));
+                qrCodeImage.Save(webRootPath + "/images/QR/" + user.Login + ".jpg");
+                return View();//RedirectToAction("Medical", "AddFinaly", model);
+            }
+            return RedirectToAction("Index", "Home");
         }
     }
 }
