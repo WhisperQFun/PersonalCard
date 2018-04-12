@@ -69,6 +69,12 @@ namespace PersonalCard.Controllers
                     QRCode qrCode = new QRCode(qrCodeData);
                     Bitmap qrCodeImage = qrCode.GetGraphic(10, Color.Black, Color.White, (Bitmap)Bitmap.FromFile(webRootPath + "/images/piedPiper.png"));
                     qrCodeImage.Save(webRootPath+"/images/QR/" +user.Login+".jpg");
+
+                    QRCodeGenerator qrGenerator1 = new QRCodeGenerator();
+                    QRCodeData qrCodeData1 = qrGenerator1.CreateQrCode("http://blockchain.whisperq.ru/medical/Emergency?token=" + user.token, QRCodeGenerator.ECCLevel.Q);
+                    QRCode qrCode1 = new QRCode(qrCodeData1);
+                    Bitmap qrCodeImage1 = qrCode1.GetGraphic(10, Color.Black, Color.White, (Bitmap)Bitmap.FromFile(webRootPath + "/images/piedPiper.png"));
+                    qrCodeImage1.Save(webRootPath + "/images/QR/" + user.Login + "_emerg.jpg");
                     await Authenticate(user); 
 
                     return RedirectToAction("Index", "Home");
@@ -112,6 +118,7 @@ namespace PersonalCard.Controllers
             HomeModel model = new HomeModel();
             model.user_login = user.Login;
             model.user_link = user.Login + ".jpg";
+            model.user_link_emerg = user.Login + "_emerg.jpg";
             model.user_balance = user.balance.ToString();
             return View(model);
         }

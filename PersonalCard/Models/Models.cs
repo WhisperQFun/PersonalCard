@@ -92,6 +92,7 @@ namespace PersonalCard.Models
     {
         public string user_login;
         public string user_link;
+        public string user_link_emerg;
         public string user_balance;
         //[Required]
         

@@ -51,9 +51,9 @@ namespace PersonalCard.Controllers
         [Authorize]
         public async Task<IActionResult> Add([FromQuery]string token)
         {
-            if (token!=null)
+            User user = await _context.User.FirstOrDefaultAsync(u => u.token == token);
+            if (user!=null)
             {
-                User user = await _context.User.FirstOrDefaultAsync(u => u.token == token);
                 MedicalModel model = new MedicalModel();
                 model.Hash = user.Hash;
 
@@ -112,9 +112,9 @@ namespace PersonalCard.Controllers
 
 		public async Task<IActionResult> Emergency([FromQuery]string token)
         {
-			if (token != null)
+            User user = await _context.User.FirstOrDefaultAsync(u => u.token == token);
+            if (user != null)
             {
-				User user = await _context.User.FirstOrDefaultAsync(u => u.token == token);
                 user.token = await ShaEncoder.GenerateSHA256String(user.Login + user.Password + DateTime.Now.ToString());
                 _context.User.Update(user);
                 await _context.SaveChangesAsync();
@@ -123,8 +123,18 @@ namespace PersonalCard.Controllers
 				QRCodeData qrCodeData = qrGenerator.CreateQrCode("http://blockchain.whisperq.ru/medical/Emergency?token=" + user.token, QRCodeGenerator.ECCLevel.Q);
                 QRCode qrCode = new QRCode(qrCodeData);
                 Bitmap qrCodeImage = qrCode.GetGraphic(10, Color.Black, Color.White, (Bitmap)Bitmap.FromFile(webRootPath + "/images/piedPiper.png"));
-                qrCodeImage.Save(webRootPath + "/images/QR/" + user.Login + ".jpg");
-                return View();//RedirectToAction("Medical", "AddFinaly", model);
+                qrCodeImage.Save(webRootPath + "/images/QR/" + user.Login + "_emerg.jpg");
+                List<Medical> medicals = new List<Medical>();
+                List<Block> blocks = _context.Block.Where(u => u.wallet_hash == user.Hash).ToList();
+
+                foreach (var bloks in blocks)
+                {
+                    medicals.Add(JsonConvert.DeserializeObject<Medical>(bloks.data));
+
+                }
+
+
+                return View(medicals);
             }
             return RedirectToAction("Index", "Home");
         }
