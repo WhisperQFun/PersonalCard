@@ -1,47 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PersonalCard.Context;
-using PersonalCard.Models;
 using PersonalCard.Services;
-using PersonalCard.Controllers;
 
 namespace PersonalCard
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+        public Startup(IConfiguration configuration) => Configuration = configuration;
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<mysqlContext>(options => options.UseMySQL(Configuration.GetConnectionString("mysqlConnection")));
+            services.AddDbContext<MySQLContext>(options => options.UseMySQL(Configuration.GetConnectionString("mysqlConnection")));
             services.AddTransient<BlockchainService>();
-            // установка конфигурации подключения
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-            .AddCookie(options => //CookieAuthenticationOptions
-            {
+                .AddCookie(options => //CookieAuthenticationOptions
+                {
                     options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
-            });
+                });
             services.AddMemoryCache();
             services.AddMvc();
-            
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
@@ -50,10 +36,7 @@ namespace PersonalCard
                 app.UseBrowserLink();
             }
             else
-            {
                 app.UseDeveloperExceptionPage();
-                //app.UseExceptionHandler("/Home/Error");
-            }
 
             app.UseStaticFiles();
             app.UseAuthentication();

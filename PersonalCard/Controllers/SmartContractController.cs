@@ -5,62 +5,59 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using PersonalCard.Context;
-using PersonalCard.Models;
-using PersonalCard.Blockchain;
-using PersonalCard.Encrypt;
-using PersonalCard.Services;
 using Newtonsoft.Json;
+using PersonalCard.Blockchain;
+using PersonalCard.Context;
+using PersonalCard.Encrypt;
+using PersonalCard.Models;
+using PersonalCard.Services;
 
 namespace PersonalCard.Controllers
 {
     public class SmartContractController : Controller
     {
+        private readonly MySQLContext _context;
+        private readonly BlockchainService _blockchainService;
 
-        private mysqlContext _context;
-        BlockchainService blockchainService;
-        public SmartContractController(mysqlContext context, BlockchainService service)
+        public SmartContractController(MySQLContext context, BlockchainService service)
         {
             _context = context;
-            blockchainService = service;
-
+            _blockchainService = service;
         }
 
         public async Task<IActionResult> Index()
         {
+            var user = await _context.User.FirstOrDefaultAsync(u => u.Login == User.Identity.Name);
 
-            List<Contract> contracts = new List<Contract>();
-            User user = await _context.User.FirstOrDefaultAsync(u => u.Login == User.Identity.Name);
-            List<Block> blocks = _context.Block.Where(u => u.wallet_hash == user.Hash && u.destination_wallet_hash!=null).ToList();
+            var blocks = _context.Block.Where(u => u.wallet_hash == user.Hash
+                && u.destination_wallet_hash != null).ToList();
+            var contracts = new List<Contract>();
 
-            foreach (var bloks in blocks)
-            {
-                contracts.Add(JsonConvert.DeserializeObject<Contract>(bloks.data));
-
-            }
-
+            foreach (var block in blocks)
+                contracts.Add(JsonConvert.DeserializeObject<Contract>(block.data));
 
             return View(contracts);
         }
+
         [Authorize]
         public async Task<IActionResult> Add()
         {
-            User user = null;
-            user = await _context.User.FirstOrDefaultAsync(u => u.Login == User.Identity.Name);
-            SmartContractModel model = new SmartContractModel();
+            var user = await _context.User.FirstOrDefaultAsync(u => u.Login == User.Identity.Name);
+            var model = new SmartContractModel();
+
             model.hash_сustomer = user.Hash;
             return View(model);
         }
 
-        
 		[HttpPost]
         [ValidateAntiForgeryToken]
-		public async Task<IActionResult> Add(string hash_сustomer,string hash_executor,string order_sum,string prepaid_expense, string condition,string is_Done,string is_freze)
+		public async Task<IActionResult> Add(string hash_сustomer, string hash_executor,
+            string order_sum, string prepaid_expense, string condition, string is_Done, string is_freze)
         {
-            bool is_Done_bool = String2bool.convert(is_Done);
-            bool is_freze_bool = String2bool.convert(is_Done);
+            var is_Done_bool = String2Bool.Convert(is_Done);
+            var is_freze_bool = String2Bool.Convert(is_Done);
+
             User user = null;
-            Contract contract = null;
             Transactions transactions = null;
             
             if (ModelState.IsValid)
@@ -70,8 +67,8 @@ namespace PersonalCard.Controllers
                 {
                     if (user.balance >= Convert.ToDouble(order_sum))
                     {
-                        string contract_hash = await ShaEncoder.GenerateSHA256String(order_sum + prepaid_expense + DateTime.Now);
-                        contract = new Contract
+                        string contract_hash = await ShaEncoder.GenerateSHA256String($"{order_sum}{prepaid_expense}{DateTime.Now}");
+                        var contract = new Contract
                         {
                             hash_сustomer = user.Hash,
                             hash_еxecutor = hash_executor,
@@ -81,36 +78,35 @@ namespace PersonalCard.Controllers
                             is_Done = false,
                             contractID = contract_hash
                         };
-                        //,Hash = await ShaEncoder.GenerateSHA256String(model.login + model.password + model.code_phrase
-                        string json = JsonConvert.SerializeObject(contract);
-                        blockchainService.AddBlockAsync(await blockchainService.generateNextBlockAsync(json, user.Hash, hash_executor));
+
+                        var json = JsonConvert.SerializeObject(contract);
+
+                        await _blockchainService.AddBlockAsync(await _blockchainService.generateNextBlockAsync(json, user.Hash, hash_executor));
+
                         transactions = new Transactions
                         {
-                            original_wallet = user.Hash
-                            ,
+                            original_wallet = user.Hash,
                             destination_wallet = hash_executor,
                             info = json,
                             timestamp = DateTime.Now.ToString()
                         };
+
+                        user.balance = Convert.ToInt16(prepaid_expense);
+
+                        _context.User.Update(user);
                         await _context.Transactions.AddAsync(transactions);
                         await _context.SaveChangesAsync();
-                        user.balance = Convert.ToInt16(prepaid_expense);
-                        _context.User.Update(user);
-                        await _context.SaveChangesAsync();
+
                         return RedirectToAction("Index", "Home");
                     }
-                    else
-                    {
-                        return Content("Недостаточно средств" );
-                    }
-                }
-                else
-                    ModelState.AddModelError("", "Некорректные логин и(или) пароль");
-            }
-            return View();
 
-            //User user = await _context.User.FirstOrDefaultAsync(u => u.Hash == Hash);
-            //return View();
+                    return Content("Недостаточно средств");
+                }
+
+                ModelState.AddModelError("", "Некорректные логин и(или) пароль");
+            }
+
+            return View();
         }
     }
 }
