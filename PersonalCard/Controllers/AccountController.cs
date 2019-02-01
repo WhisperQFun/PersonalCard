@@ -1,46 +1,41 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using PersonalCard.Models;
-using System.Threading.Tasks;
+﻿using System;
 using System.Collections.Generic;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
-using PersonalCard.Services;
-using PersonalCard.Encrypt;
-using PersonalCard.Context;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
-using System;
-using QRCoder;
 using System.DrawingCore;
-
+using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using PersonalCard.Context;
+using PersonalCard.Encrypt;
+using PersonalCard.Models;
+using PersonalCard.Services;
+using QRCoder;
 
 namespace PersonalCard.Controllers
 {
     public class AccountController : Controller
     {
-        private  mysqlContext _context;
-        BlockchainService blockchainService;
+        private readonly MySQLContext _context;
+        private readonly BlockchainService _blockchainService;
+
         private readonly IHostingEnvironment _hostingEnvironment;
-        public AccountController(mysqlContext context, BlockchainService service, IHostingEnvironment hostingEnvironment)
+
+        public AccountController(MySQLContext context, BlockchainService service,
+            IHostingEnvironment hostingEnvironment)
         {
-            _hostingEnvironment = hostingEnvironment;
-            blockchainService = service;
             _context = context;
+            _blockchainService = service;
+            _hostingEnvironment = hostingEnvironment;
         }
 
-        //[Authorize(Roles = "admin, user")]
         [Authorize]
-        public async Task<IActionResult> Index()
-        {
-            return View();
-        }
+        public IActionResult Index() => View();
 
-        public async Task<IActionResult> Register()
-        {
-            return View();
-        }
+        public IActionResult Register() => View();
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -48,95 +43,62 @@ namespace PersonalCard.Controllers
         {
             if (ModelState.IsValid)
             {
-                User user = await _context.User.FirstOrDefaultAsync(u => u.Login == model.login);
+                var user = await _context.User.FirstOrDefaultAsync(u => u.Login == model.login);
                 if (user == null)
                 {
-                    
-                    user = new User { Login = model.login, Password = await ShaEncoder.GenerateSHA256String( model.password),
-                        type_of_bloud =model.type_of_blood,Hash = await ShaEncoder.GenerateSHA256String(model.login+model.password+model.code_phrase),
-                        token = await ShaEncoder.GenerateSHA256String(model.login + model.password + DateTime.Now.ToString())
-                        
-                };
-                    Role userRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "User");
+                    user = new User
+                    {
+                        Login = model.login,
+                        Password = await ShaEncoder.GenerateSHA256String(model.password),
+                        type_of_bloud = model.type_of_blood,
+                        Hash = await ShaEncoder.GenerateSHA256String($"{model.login}{model.password}{model.code_phrase}"),
+                        token = await ShaEncoder.GenerateSHA256String($"{model.login}{model.password}{DateTime.Now}")
+                    };
+
+                    var userRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "User");
                     if (userRole != null)
                         user.Role = userRole;
 
                     _context.User.Add(user);
                     await _context.SaveChangesAsync();
-                    string webRootPath = _hostingEnvironment.WebRootPath;
-                    QRCodeGenerator qrGenerator = new QRCodeGenerator();
-                    QRCodeData qrCodeData = qrGenerator.CreateQrCode("http://blockchain.whisperq.ru/medical/add?token="+user.token, QRCodeGenerator.ECCLevel.Q);
-                    QRCode qrCode = new QRCode(qrCodeData);
-                    Bitmap qrCodeImage = qrCode.GetGraphic(10, Color.Black, Color.White, (Bitmap)Bitmap.FromFile(webRootPath + "/images/piedPiper.png"));
-                    qrCodeImage.Save(webRootPath+"/images/QR/" +user.Login+".jpg");
 
-                    QRCodeGenerator qrGenerator1 = new QRCodeGenerator();
-                    QRCodeData qrCodeData1 = qrGenerator1.CreateQrCode("http://blockchain.whisperq.ru/medical/Emergency?token=" + user.token, QRCodeGenerator.ECCLevel.Q);
-                    QRCode qrCode1 = new QRCode(qrCodeData1);
-                    Bitmap qrCodeImage1 = qrCode1.GetGraphic(10, Color.Black, Color.White, (Bitmap)Bitmap.FromFile(webRootPath + "/images/piedPiper.png"));
-                    qrCodeImage1.Save(webRootPath + "/images/QR/" + user.Login + "_emerg.jpg");
-                    await Authenticate(user); 
+                    GenerateUserQRCodes(user);
 
+                    await Authenticate(user);
                     return RedirectToAction("Index", "Home");
                 }
-                else
-                    ModelState.AddModelError("", "Некорректные логин и(или) пароль");
+
+                ModelState.AddModelError("", "Некорректные логин и(или) пароль");
             }
+
             return View(model);
         }
+
         [HttpGet]
-        public IActionResult Login()
-        {
-            return View();
-        }
+        public IActionResult Login() => View();
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginModel model)
         {
             if (ModelState.IsValid)
             {
-                string pass = await ShaEncoder.GenerateSHA256String(model.password);
-                User user = await _context.User
+                var pass = await ShaEncoder.GenerateSHA256String(model.password);
+
+                var user = await _context.User
                     .Include(u => u.Role)
                     .FirstOrDefaultAsync(u => u.Login == model.email && u.Password == pass);
+
                 if (user != null)
                 {
                     await Authenticate(user); 
-
                     return RedirectToAction("Index", "Home");
                 }
+
                 ModelState.AddModelError("", "Некорректные логин и(или) пароль");
             }
+
             return View(model);
-        }
-
-        [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> Home()
-        {
-            User user = await _context.User.FirstOrDefaultAsync(u => u.Login == User.Identity.Name);
-            HomeModel model = new HomeModel();
-            model.user_login = user.Login;
-            model.user_link = user.Login + ".jpg";
-            model.user_link_emerg = user.Login + "_emerg.jpg";
-            model.user_balance = Convert.ToString(user.balance);
-            return View(model);
-        }
-
-
-        private async Task Authenticate(User user)
-        {
-            // создаем один claim
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimsIdentity.DefaultNameClaimType, user.Login),
-                new Claim(ClaimsIdentity.DefaultRoleClaimType, user.Role?.Name)
-            };
-            // создаем объект ClaimsIdentity
-            ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType,
-                ClaimsIdentity.DefaultRoleClaimType);
-            // установка аутентификационных куки
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
         }
 
         public async Task<IActionResult> Logout()
@@ -144,7 +106,62 @@ namespace PersonalCard.Controllers
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login", "Account");
         }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Home()
+        {
+            var user = await _context.User.FirstOrDefaultAsync(u => u.Login == User.Identity.Name);
+
+            var model = new HomeModel();
+            model.user_login = user.Login;
+            model.user_link = user.Login + ".jpg";
+            model.user_link_emerg = user.Login + "_emerg.jpg";
+            model.user_balance = Convert.ToString(user.balance);
+
+            return View(model);
+        }
+
+        private async Task Authenticate(User user)
+        {
+            // Create claim list
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimsIdentity.DefaultNameClaimType, user.Login),
+                new Claim(ClaimsIdentity.DefaultRoleClaimType, user.Role?.Name)
+            };
+
+            // Create object ClaimsIdentity
+            var claimsIdentity = new ClaimsIdentity(
+                claims,
+                "ApplicationCookie",
+                ClaimsIdentity.DefaultNameClaimType,
+                ClaimsIdentity.DefaultRoleClaimType);
+
+            // Set up authentication cookie
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity));
+        }
+
+        private void GenerateUserQRCodes(User user)
+        {
+            var codeGenerator = new QRCodeGenerator();
+            var webRootPath = _hostingEnvironment.WebRootPath;
+
+            var medicalQRCode = new QRCode(codeGenerator.CreateQrCode(
+                $"http://blockchain.whisperq.ru/medical/add?token={user.token}",
+                QRCodeGenerator.ECCLevel.Q));
+            var emergencyQRCode = new QRCode(codeGenerator.CreateQrCode(
+                $"http://blockchain.whisperq.ru/medical/Emergency?token={user.token}",
+                QRCodeGenerator.ECCLevel.Q));
+
+            var medicalQRImage = medicalQRCode.GetGraphic(10, Color.Black, Color.White,
+                (Bitmap)Image.FromFile($"{webRootPath}/images/piedPiper.png"));
+            var emergencyQRImage = emergencyQRCode.GetGraphic(10, Color.Black, Color.White,
+                (Bitmap)Image.FromFile($"{webRootPath}/images/piedPiper.png"));
+
+            medicalQRImage.Save($"{webRootPath}/images/QR/{user.Login}.jpg");
+            emergencyQRImage.Save($"{webRootPath}/images/QR/{user.Login}_emerg.jpg");
+        }
     }
 }
-
-    

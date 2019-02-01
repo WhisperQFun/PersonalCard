@@ -1,5 +1,3 @@
-using System;
-
 namespace PersonalCard.Models
 {
     public class ErrorViewModel

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 using PersonalCard.Blockchain;
 
 namespace PersonalCard.Models
@@ -11,14 +8,19 @@ namespace PersonalCard.Models
     {
         [Required]
         public string hash_сustomer;
+
         [Required]
         public string hash_еxecutor;
+
         [Required]
         public string order_sum;
+
         [Required]
         public string prepaid_expense;
+
         [Required]
         public string condition;
+
         public bool is_Done;
         public bool is_freze;
     }
@@ -52,24 +54,28 @@ namespace PersonalCard.Models
 
         [Required]
         public string type_of_blood { get; set; }
-
-
     }
 
     public class MedicalModel
     {
         [Required]
         public string diagnosis { get; set; }
+
         [Required]
         public string diagnosis_fully { get; set; }
+
         [Required]
         public string first_aid { get; set; }
+
         [Required]
         public string drugs { get; set; }
+
         [Required]
         public bool is_important { get; set; }
+
         [Required]
         public string Hash { get; set; }
+
         [Required]
         public string key_frase { get; set; }
     }
@@ -77,24 +83,21 @@ namespace PersonalCard.Models
 	public class MedicalsModel
 	{
 		public List<Medical> medicals { get; set; }
-
 	}
 
     public class ApiModel
     {
-        
         [Required]
         public string site { get; set; }
         [Required]
         public string organisation { get; set; }
     }
+
     public class HomeModel
     {
         public string user_login;
         public string user_link;
         public string user_link_emerg;
         public string user_balance;
-        //[Required]
-        
     }
 }
